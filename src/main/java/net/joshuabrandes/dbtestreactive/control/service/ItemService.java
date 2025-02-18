@@ -4,6 +4,7 @@ import net.joshuabrandes.dbtestreactive.entity.db.ItemRepository;
 import net.joshuabrandes.dbtestreactive.entity.model.Item;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +21,15 @@ public class ItemService {
         return itemRepository.findAllByCreatedAtBefore(timestamp);
     }
 
+    public Flux<Item> getAllItemsAfterAndPriceGreaterThan(LocalDateTime createdAtAfter, Double priceIsGreaterThan) {
+        return itemRepository.findAllByCreatedAtAfterAndPriceGreaterThan(createdAtAfter, priceIsGreaterThan);
+    }
+
     public Flux<Item> getAllItems() {
         return itemRepository.findAll();
+    }
+
+    public Mono<Item> saveItem(Item item) {
+        return itemRepository.save(item);
     }
 }

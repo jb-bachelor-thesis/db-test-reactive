@@ -30,17 +30,8 @@ public class ItemHandler {
     }
 
     public Mono<ServerResponse> getCategories(ServerRequest request) {
-        return itemService.getAllItemsBeforeTimestamp(REFERENCE_TIME)
-                .filter(item -> item.getPrice() > 100)
+        return itemService.getAllItemsAfterAndPriceGreaterThan(REFERENCE_TIME.minusYears(3), 500.0)
                 .filter(item -> !item.getStatus().equalsIgnoreCase("discontinued"))
-                .filter(item -> {
-                    if (item.getCategory().equals("Electronics")) {
-                        return item.getPrice() < 1000.0;                      // Electronics price ceiling
-                    } else if (item.getCategory().equals("Jewelry")) {
-                        return item.getPrice() > 250.0;                       // Jewelry minimum value
-                    }
-                    return true;
-                })
                 .sort((a, b) -> {
                     var categoryComparison = a.getCategory().compareTo(b.getCategory());
                     if (categoryComparison != 0) return categoryComparison;
@@ -50,7 +41,7 @@ public class ItemHandler {
 
                     return b.getCreatedAt().compareTo(a.getCreatedAt());
                 })
-                .map(item -> {
+                .flatMap(item -> {
                     var adjustedPrice = item.getPrice();
                     if (item.getCreatedAt().isBefore(REFERENCE_TIME.minusMonths(6))) {
                         adjustedPrice *= 0.9;
@@ -60,16 +51,14 @@ public class ItemHandler {
                     }
 
                     item.setPrice(adjustedPrice);
-                    return item;
+
+                    return itemService.saveItem(item);
                 })
-                .filter(item -> item.getPrice() <= 850.0)
                 .collect(Collectors.groupingBy(Item::getCategory, Collectors.averagingDouble(Item::getPrice)))
                 .flatMapMany(map -> Flux.fromIterable(map.entrySet()))
                 .map(entry -> new CategoryDTO(entry.getKey(), entry.getValue()))
                 .collectList()
                 .flatMap(list -> ServerResponse.ok().bodyValue(list));
-
-
     }
 
     public Mono<ServerResponse> getExpensiveItemsByCategory(ServerRequest request) {

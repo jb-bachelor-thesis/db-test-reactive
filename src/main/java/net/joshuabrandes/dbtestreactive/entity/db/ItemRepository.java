@@ -9,4 +9,6 @@ import java.time.LocalDateTime;
 public interface ItemRepository extends ReactiveCrudRepository<Item, Long> {
 
     Flux<Item> findAllByCreatedAtBefore(LocalDateTime timestamp);
+
+    Flux<Item> findAllByCreatedAtAfterAndPriceGreaterThan(LocalDateTime createdAtAfter, Double priceIsGreaterThan);
 }
