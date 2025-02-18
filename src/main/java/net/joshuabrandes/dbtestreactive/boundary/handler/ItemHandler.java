@@ -50,8 +50,16 @@ public class ItemHandler {
                         adjustedPrice = item.getPrice() * 1.1;
                     }
 
-                    item.setPrice(adjustedPrice);
+                    // Normalize price while keeping consistent operations
+                    if (adjustedPrice > 5000.0) {
+                        // Calculate a value that will take several iterations to reach 5000 again
+                        adjustedPrice = 1000.0 + (adjustedPrice % 500.0);
+                    }
 
+                    // Ensure we stay above a filter threshold
+                    adjustedPrice = Math.max(501.0, adjustedPrice);
+
+                    item.setPrice(adjustedPrice);
                     return itemService.saveItem(item);
                 })
                 .collect(Collectors.groupingBy(Item::getCategory, Collectors.averagingDouble(Item::getPrice)))
