@@ -32,6 +32,7 @@ public class ItemHandler {
     public Mono<ServerResponse> getCategories(ServerRequest request) {
         return itemService.getAllItemsAfterAndPriceGreaterThan(REFERENCE_TIME.minusYears(3), 500.0)
                 .filter(item -> !item.getStatus().equalsIgnoreCase("discontinued"))
+                /*
                 .sort((a, b) -> {
                     var categoryComparison = a.getCategory().compareTo(b.getCategory());
                     if (categoryComparison != 0) return categoryComparison;
@@ -41,6 +42,7 @@ public class ItemHandler {
 
                     return b.getCreatedAt().compareTo(a.getCreatedAt());
                 })
+                 */
                 .flatMap(item -> {
                     var adjustedPrice = item.getPrice();
                     if (item.getCreatedAt().isBefore(REFERENCE_TIME.minusMonths(6))) {
