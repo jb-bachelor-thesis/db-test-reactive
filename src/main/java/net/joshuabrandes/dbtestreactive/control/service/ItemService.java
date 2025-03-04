@@ -7,6 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ItemService {
@@ -31,5 +32,9 @@ public class ItemService {
 
     public Mono<Item> saveItem(Item item) {
         return itemRepository.save(item);
+    }
+
+    public Flux<Item> saveAllItems(List<Item> items) {
+        return itemRepository.saveAll(items);
     }
 }
