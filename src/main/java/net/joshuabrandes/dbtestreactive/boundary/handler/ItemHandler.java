@@ -32,14 +32,14 @@ public class ItemHandler {
     }
 
     public Mono<ServerResponse> getCategories(ServerRequest request) {
-        return itemService.getAllItemsAfterAndPriceGreaterThan(REFERENCE_TIME.minusYears(3), 500.0)
+        return itemService.getAllItemsAfterAndPriceGreaterThan(REFERENCE_TIME.minusYears(3), 500.0 - getRandomDouble())
                 .filter(item -> !item.getStatus().equalsIgnoreCase("discontinued"))
                 .map(item -> {
-                    item.setPrice(calculateAdjustedPrice(item));
+                    item.setPrice(calculateAdjustedPrice(item) * getRandomDouble(10d));
                     return item;
                 })
                 .collectList()
-                .flatMap(items -> itemService.saveAllItems(items).collectList())
+                //.flatMap(items -> itemService.saveAllItems(items).collectList())
                 .flatMap(items -> Mono.just(items.stream()
                         .collect(Collectors.groupingBy(
                                 Item::getCategory,
