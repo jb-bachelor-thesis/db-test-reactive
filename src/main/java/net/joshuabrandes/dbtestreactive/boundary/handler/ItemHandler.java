@@ -7,7 +7,6 @@ import net.joshuabrandes.dbtestreactive.entity.model.Item;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -39,7 +38,6 @@ public class ItemHandler {
                     return item;
                 })
                 .collectList()
-                //.flatMap(items -> itemService.saveAllItems(items).collectList())
                 .flatMap(items -> Mono.just(items.stream()
                         .collect(Collectors.groupingBy(
                                 Item::getCategory,
@@ -47,7 +45,7 @@ public class ItemHandler {
                         ))))
                 .flatMap(map -> Mono.just(map.entrySet().stream()
                         .map(entry -> new CategoryDTO(entry.getKey(), entry.getValue()))
-                        .collect(Collectors.toList())))
+                        .toList()))
                 .flatMap(list -> ServerResponse.ok().bodyValue(list));
     }
 
